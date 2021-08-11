@@ -57,12 +57,12 @@ WORKDIR /usr/src/app/
 RUN curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo
 RUN rpm --import https://dl.yarnpkg.com/rpm/pubkey.gpg
 RUN curl --silent --location "${NODE_SRC}" | bash -
-RUN yum -y update && -y install nodejs git
+RUN yum -y update && yum -y install nodejs git yarn
 
 #
 # Copy the base files for the build
 #
-COPY --from=src /src/package.json yarn.lock ./
+COPY --from=src /src/package.json /src/yarn.lock ./
 COPY --from=src /src/packages packages
 RUN yarn install --pure-lockfile --no-progress
 
