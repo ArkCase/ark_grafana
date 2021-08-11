@@ -116,7 +116,7 @@ WORKDIR "${GOROOT}"
 #
 # Download and install go
 #
-RUN curl -L "${GO_SRC}" -o - | tar -C "${GOROOT}" -xzf -
+RUN curl -L "${GO_SRC}" -o - | tar -C "/usr/local" -xzf -
 RUN yum -y update && yum -y install gcc g++
 
 WORKDIR "${GOPATH}/src/github.com/grafana/grafana"
