@@ -190,6 +190,7 @@ WORKDIR "${GF_PATHS_HOME}"
 # Pull in some artifacts from the source image
 #
 COPY --from=src /src/conf ./conf
+COPY --from=src /src/packaging/docker/run.sh /run.sh
 
 #
 # Update and install required packages
@@ -235,4 +236,4 @@ USER        ${UID}
 EXPOSE      3000
 VOLUME      [ "/var/lib/grafana", "/etc/grafana/provisioning" ]
 WORKDIR     /app/data
-ENTRYPOINT  [ "${GF_PATHS_HOME}/packaging/docker/run.sh" ]
+ENTRYPOINT  [ "/run.sh" ]
