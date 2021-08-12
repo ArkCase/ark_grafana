@@ -234,6 +234,6 @@ COPY --from=js-builder /usr/src/app/tools ./tools
 #
 USER        ${UID}
 EXPOSE      3000
-VOLUME      [ "/var/lib/grafana", "/etc/grafana/provisioning" ]
+VOLUME      [ "/var/lib/grafana" ]
 WORKDIR     /app/data
 ENTRYPOINT  [ "/run.sh" ]
