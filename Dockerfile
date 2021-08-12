@@ -165,7 +165,7 @@ LABEL IMAGE_SOURCE="https://github.com/ArkCase/ark_grafana"
 RUN useradd --system --user-group "${UID}"
 
 #
-# Define some important arguments
+# Define some important environment variables
 #
 ENV GF_PATHS_LOGS="/var/log/grafana"
 # Data Directories
