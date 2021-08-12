@@ -114,7 +114,7 @@ ENV PATH="${PATH}:${GOROOT}/bin"
 WORKDIR "${GOROOT}"
 
 #
-# Download and install go
+# Download and install go and GCC (needed for compilation/linking)
 #
 RUN curl -L "${GO_SRC}" -o - | tar -C "/usr/local" -xzf -
 RUN yum -y update && yum -y install gcc g++
