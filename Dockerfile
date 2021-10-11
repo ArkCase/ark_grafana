@@ -148,7 +148,7 @@ ARG ARCH="amd64"
 ARG OS="linux"
 ARG VER="8.1.1"
 ARG PKG="grafana"
-ARG UID="grafana"
+ARG UID="472"
 
 #
 # Some important labels
@@ -162,7 +162,7 @@ LABEL IMAGE_SOURCE="https://github.com/ArkCase/ark_grafana"
 #
 # Create the required user
 #
-RUN useradd --system --user-group "${UID}"
+RUN useradd --system --uid ${UID} --user-group grafana
 
 #
 # Define some important environment variables
@@ -209,7 +209,7 @@ RUN mkdir -p \
         "${GF_PATHS_DATA}" && \
     cp "${GF_PATHS_HOME}/conf/sample.ini" "${GF_PATHS_CONFIG}" && \
     cp "${GF_PATHS_HOME}/conf/ldap.toml"  "${GF_PATHS_ETC}/ldap.toml" && \
-    chown -R "${UID}:" \
+    chown -R grafana: \
         "${GF_PATHS_DATA}" \
         "${GF_PATHS_HOME}/.aws" \
         "${GF_PATHS_LOGS}" \
@@ -232,7 +232,7 @@ COPY --from=js-builder /usr/src/app/tools ./tools
 #
 # Final parameters
 #
-USER        ${UID}
+USER        grafana
 EXPOSE      3000
 VOLUME      [ "/var/lib/grafana" ]
 WORKDIR     /app/data
