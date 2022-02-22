@@ -1,7 +1,7 @@
 #
 # This one houses the main git clone
 #
-FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest as src
+FROM 34528.1.1424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest as src
 
 #
 # Basic Parameters
@@ -30,7 +30,7 @@ RUN yum -y update && yum -y install git && git clone -b "v${VER}" --single-branc
 #
 # This one builds the JS artifacts
 #
-FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest as js-builder
+FROM 34528.1.1424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest as js-builder
 
 #
 # Basic Parameters
@@ -84,7 +84,7 @@ RUN yarn build
 #
 # This one builds the Go artifacts
 #
-FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest as go-builder
+FROM 34528.1.1424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest as go-builder
 
 #
 # Basic Parameters
@@ -139,7 +139,7 @@ RUN go run build.go build
 #
 # The actual runnable container
 #
-FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest
+FROM 34528.1.1424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest
 
 #
 # Basic Parameters
