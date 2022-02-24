@@ -8,7 +8,7 @@ FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest as src
 #
 ARG ARCH="amd64"
 ARG OS="linux"
-ARG VER="8.1.1"
+ARG VER="8.4.2"
 ARG PKG="grafana"
 ARG SRC="https://github.com/grafana/grafana.git"
 
@@ -37,7 +37,7 @@ FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest as js-builder
 #
 ARG ARCH="amd64"
 ARG OS="linux"
-ARG VER="8.1.1"
+ARG VER="8.4.2"
 ARG PKG="grafana"
 ARG NODE_SRC="https://rpm.nodesource.com/setup_16.x"
 
@@ -54,22 +54,26 @@ WORKDIR /usr/src/app/
 #
 # Install NodeJS and Yarn
 #
-RUN curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo
-RUN rpm --import https://dl.yarnpkg.com/rpm/pubkey.gpg
+
+ENV NODE_OPTIONS="--max_old_space_size=8000"
+
 RUN curl --silent --location "${NODE_SRC}" | bash -
-RUN yum -y update && yum -y install nodejs git yarn
+RUN yum -y update && yum -y install nodejs git
+RUN corepack enable
 
 #
 # Copy the base files for the build
 #
-COPY --from=src /src/package.json /src/yarn.lock ./
+COPY --from=src /src/package.json /src/yarn.lock /src/.yarnrc.yml ./
+COPY --from=src /src/.yarn .yarn
 COPY --from=src /src/packages packages
-RUN yarn install --pure-lockfile --no-progress
+COPY --from=src /src/plugins-bundled plugins-bundled
+RUN YARN_CHECKSUM_BEHAVIOR="update" yarn install
 
 #
 # Pull in more artifacts for the build
 #
-COPY --from=src /src/tsconfig.json /src/.eslintrc /src/.editorconfig /src/.browserslistrc /src/.prettierrc.js ./
+COPY --from=src /src/tsconfig.json /src/.eslintrc /src/.editorconfig /src/.browserslistrc /src/.prettierrc.js /src/babel.config.json /src/.linguirc ./
 COPY --from=src /src/public public
 COPY --from=src /src/tools tools
 COPY --from=src /src/scripts scripts
@@ -91,9 +95,9 @@ FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest as go-builder
 #
 ARG ARCH="amd64"
 ARG OS="linux"
-ARG VER="8.1.1"
+ARG VER="8.4.2"
 ARG PKG="grafana"
-ARG GO_VER="1.16.7"
+ARG GO_VER="1.17.7"
 ARG GO_SRC="https://golang.org/dl/go${GO_VER}.${OS}-${ARCH}.tar.gz"
 
 #
@@ -117,24 +121,28 @@ WORKDIR "${GOROOT}"
 # Download and install go and GCC (needed for compilation/linking)
 #
 RUN curl -L "${GO_SRC}" -o - | tar -C "/usr/local" -xzf -
-RUN yum -y update && yum -y install gcc g++
+RUN yum -y update && yum -y install gcc g++ make
 
 WORKDIR "${GOPATH}/src/github.com/grafana/grafana"
 
 #
 # Pull in more artifacts for the build
 #
-COPY --from=src /src/go.mod /src/go.sum /src/embed.go ./
+COPY --from=src /src/go.mod /src/go.sum /src/embed.go /src/Makefile /src/build.go /src/package.json ./
 COPY --from=src /src/cue cue
+COPY --from=src /src/packages/grafana-schema packages/grafana-schema
 COPY --from=src /src/public/app/plugins public/app/plugins
+COPY --from=src /src/public/api-spec.json public/api-spec.json
 COPY --from=src /src/pkg pkg
-COPY --from=src /src/build.go /src/package.json ./
+COPY --from=src /src/scripts scripts
+COPY --from=src /src/cue.mod cue.mod
+COPY --from=src /src/.bingo .bingo
 
 #
 # Run the build
 #
 RUN go mod verify
-RUN go run build.go build
+RUN make build-go
 
 #
 # The actual runnable container
@@ -146,9 +154,9 @@ FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest
 #
 ARG ARCH="amd64"
 ARG OS="linux"
-ARG VER="8.1.1"
+ARG VER="8.4.2"
 ARG PKG="grafana"
-ARG UID="grafana"
+ARG UID="472"
 
 #
 # Some important labels
@@ -162,7 +170,7 @@ LABEL IMAGE_SOURCE="https://github.com/ArkCase/ark_grafana"
 #
 # Create the required user
 #
-RUN useradd --system --user-group "${UID}"
+RUN useradd --system --uid ${UID} --user-group grafana
 
 #
 # Define some important environment variables
@@ -209,7 +217,7 @@ RUN mkdir -p \
         "${GF_PATHS_DATA}" && \
     cp "${GF_PATHS_HOME}/conf/sample.ini" "${GF_PATHS_CONFIG}" && \
     cp "${GF_PATHS_HOME}/conf/ldap.toml"  "${GF_PATHS_ETC}/ldap.toml" && \
-    chown -R "${UID}:" \
+    chown -R grafana: \
         "${GF_PATHS_DATA}" \
         "${GF_PATHS_HOME}/.aws" \
         "${GF_PATHS_LOGS}" \
@@ -232,7 +240,7 @@ COPY --from=js-builder /usr/src/app/tools ./tools
 #
 # Final parameters
 #
-USER        ${UID}
+USER        grafana
 EXPOSE      3000
 VOLUME      [ "/var/lib/grafana" ]
 WORKDIR     /app/data
