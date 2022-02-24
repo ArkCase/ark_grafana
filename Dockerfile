@@ -8,7 +8,7 @@ FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest as src
 #
 ARG ARCH="amd64"
 ARG OS="linux"
-ARG VER="8.4.1"
+ARG VER="8.4.2"
 ARG PKG="grafana"
 ARG SRC="https://github.com/grafana/grafana.git"
 
@@ -37,7 +37,7 @@ FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest as js-builder
 #
 ARG ARCH="amd64"
 ARG OS="linux"
-ARG VER="8.4.1"
+ARG VER="8.4.2"
 ARG PKG="grafana"
 ARG NODE_SRC="https://rpm.nodesource.com/setup_16.x"
 
@@ -95,7 +95,7 @@ FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest as go-builder
 #
 ARG ARCH="amd64"
 ARG OS="linux"
-ARG VER="8.4.1"
+ARG VER="8.4.2"
 ARG PKG="grafana"
 ARG GO_VER="1.17.7"
 ARG GO_SRC="https://golang.org/dl/go${GO_VER}.${OS}-${ARCH}.tar.gz"
@@ -154,7 +154,7 @@ FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest
 #
 ARG ARCH="amd64"
 ARG OS="linux"
-ARG VER="8.4.1"
+ARG VER="8.4.2"
 ARG PKG="grafana"
 ARG UID="472"
 
