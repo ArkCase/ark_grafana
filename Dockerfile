@@ -1,7 +1,11 @@
 #
 # This one houses the main git clone
 #
-FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest as src
+ARG PUBLIC_REGISTRY="public.ecr.aws"
+ARG BASE_REPO="arkcase/base"
+ARG BASE_VER="8"
+ARG BASE_IMG="${PUBLIC_REGISTRY}/${BASE_REPO}:${BASE_VER}"
+FROM "${BASE_IMG}" as src
 
 #
 # Basic Parameters
@@ -30,7 +34,7 @@ RUN yum -y update && yum -y install git && git clone -b "v${VER}" --single-branc
 #
 # This one builds the JS artifacts
 #
-FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest as js-builder
+FROM "${BASE_IMG}" as js-builder
 
 #
 # Basic Parameters
@@ -84,8 +88,7 @@ RUN yarn build
 #
 # This one builds the Go artifacts
 #
-FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest as go-builder
-
+FROM "${BASE_IMG}" as go-builder
 #
 # Basic Parameters
 #
@@ -117,8 +120,8 @@ WORKDIR "${GOROOT}"
 # Download and install go and GCC (needed for compilation/linking)
 #
 RUN curl -L "${GO_SRC}" -o - | tar -C "/usr/local" -xzf -
-RUN yum -y update && yum -y install gcc g++
 
+RUN yum -y update && yum -y group install "Development Tools"
 WORKDIR "${GOPATH}/src/github.com/grafana/grafana"
 
 #
@@ -139,8 +142,7 @@ RUN go run build.go build
 #
 # The actual runnable container
 #
-FROM 345280441424.dkr.ecr.ap-south-1.amazonaws.com/ark_base:latest
-
+FROM "${BASE_IMG}"
 #
 # Basic Parameters
 #
